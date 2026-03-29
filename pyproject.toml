@@ -1,0 +1,48 @@
+[project]
+name = "faod"
+version = "0.1.0"
+description = "Frequency-Adaptive Object Detection Using Events and Frames"
+requires-python = ">=3.11"
+dependencies = [
+    "torch==2.1.1",
+    "torchvision==0.16.1",
+    "torchaudio==2.1.1",
+    "torchdata==0.7.1",
+    "pytorch-lightning==1.8.6",
+    "wandb>=0.16",
+    "hydra-core",
+    "einops",
+    "tqdm",
+    "numba",
+    "h5py",
+    "hdf5plugin",
+    "pandas",
+    "plotly",
+    "opencv-python-headless",
+    "tabulate",
+    "pycocotools",
+    "bbox-visualizer",
+    "StrEnum",
+    "lovely-tensors",
+    "tensorboardX",
+    "scikit-learn",
+    "ipdb",
+    "timm",
+    "numpy==1.26.3",
+    "openmim",
+]
+
+[tool.uv]
+# Torch wheels come from PyTorch's CUDA 11.8 index
+index-url = "https://pypi.org/simple"
+
+[[tool.uv.index]]
+name = "pytorch-cu118"
+url = "https://download.pytorch.org/whl/cu118"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu118" }
+torchvision = { index = "pytorch-cu118" }
+torchaudio = { index = "pytorch-cu118" }
+torchdata = { index = "pytorch-cu118" }

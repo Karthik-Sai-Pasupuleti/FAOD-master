@@ -7,34 +7,46 @@ including all bug fixes applied to the original repo.
 
 ## 1. Environment Setup
 
+We use [uv](https://github.com/astral-sh/uv) for fast, reproducible dependency management.
+
+### Install uv (if not already installed)
 ```bash
-# Python 3.11 virtual environment (recommended)
-python3.11 -m venv .venv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### Create environment and install dependencies
+```bash
+# Create a Python 3.11 venv
+uv venv --python 3.11 .venv
 source .venv/bin/activate
 
-# Core dependencies
-pip install torch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 \
-    --index-url https://download.pytorch.org/whl/cu118
+# Install PyTorch (CUDA 11.8) + all dependencies in one shot
+uv pip install -r requirements.txt \
+    --index-url https://download.pytorch.org/whl/cu118 \
+    --extra-index-url https://pypi.org/simple
+```
 
-pip install \
-    pytorch_lightning==1.8.6 \
-    wandb>=0.16 \
-    hydra-core einops torchdata tqdm numba \
-    h5py hdf5plugin \
-    pandas plotly opencv-python tabulate \
-    pycocotools bbox-visualizer StrEnum \
-    lovely-tensors tensorboardX pykeops \
-    scikit-learn ipdb timm \
-    opencv-python-headless \
-    numpy==1.26.3
+Or use `pyproject.toml` (syncs everything automatically):
+```bash
+uv sync
+source .venv/bin/activate
+```
 
-# mmcv (optional — needed only if model.backbone.enable_align=True)
-pip install openmim
+### Add/remove packages
+```bash
+uv add <package>          # add and update pyproject.toml
+uv remove <package>       # remove
+uv pip install <package>  # ad-hoc install without touching pyproject.toml
+```
+
+### mmcv (optional — only if model.backbone.enable_align=True)
+```bash
+uv pip install openmim
 mim install mmcv
 ```
 
 > **Note:** The original repo pins `wandb==0.14.0`, which uses `np.float_`
-> removed in NumPy 1.24+. Use `wandb>=0.16` instead.
+> removed in NumPy 1.24+. `requirements.txt` uses `wandb>=0.16`.
 
 ---
 
