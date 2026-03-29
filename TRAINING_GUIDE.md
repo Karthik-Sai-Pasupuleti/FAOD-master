@@ -35,7 +35,7 @@ source .venv/bin/activate
 
 Or prefix every command with `uv run` to skip activation entirely:
 ```bash
-uv run python train.py ...
+.venv/bin/python3 train.py ...
 ```
 
 ### Manage packages
@@ -84,7 +84,7 @@ datasets/dsec_data/
 ### Step 2 — Convert to FAOD flat format
 
 ```bash
-uv run python prepare_dsec_small.py
+.venv/bin/python3 prepare_dsec_small.py
 ```
 
 This produces:
@@ -97,7 +97,7 @@ data/dsec_small_flat/
 ### Step 3 — Build stacked histogram representations
 
 ```bash
-uv run python frame_construction/main_dsec.py \
+.venv/bin/python3 frame_construction/main_dsec.py \
     --input_dir data/dsec_small_flat \
     --target_dir data/dsec_small_h5 \
     --num_processes 2
@@ -121,7 +121,7 @@ data/dsec_small_h5/freq_1_1/
 ### Small-scale training (single sequence, no wandb, no deformable alignment)
 
 ```bash
-WANDB_MODE=disabled uv run python train.py \
+WANDB_MODE=disabled .venv/bin/python3 train.py \
     dataset=dsec \
     dataset.path=data/dsec_small_h5/freq_1_1 \
     +experiment/dsec=tiny.yaml \
@@ -151,7 +151,7 @@ Key flags explained:
 ```bash
 wandb login   # set API key once
 
-uv run python train.py \
+.venv/bin/python3 train.py \
     dataset=dsec \
     dataset.path=/path/to/dsec_full_h5/freq_1_1 \
     +experiment/dsec=base.yaml \
@@ -165,7 +165,7 @@ uv run python train.py \
 ## 4. Validation / Inference
 
 ```bash
-uv run python validation.py \
+.venv/bin/python3 validation.py \
     dataset=dsec \
     dataset.path=data/dsec_small_h5/freq_1_1 \
     checkpoint=dummy/<run_id>/checkpoints/<checkpoint>.ckpt \
@@ -181,7 +181,7 @@ uv run python validation.py \
 ## 5. Visualization (demo.py)
 
 ```bash
-uv run python demo.py \
+.venv/bin/python3 demo.py \
     dataset=dsec \
     dataset.path=data/dsec_small_h5/freq_1_1 \
     checkpoint=dummy/<run_id>/checkpoints/<checkpoint>.ckpt \
