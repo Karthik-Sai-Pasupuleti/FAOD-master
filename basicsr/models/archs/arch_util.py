@@ -8,7 +8,10 @@ from torch.nn.modules.batchnorm import _BatchNorm
 from basicsr.utils import get_root_logger
 
 # from basicsr.models.ops.dcn import ModulatedDeformConvPack, modulated_deform_conv
-from mmcv.ops import DeformConv2d
+try:
+    from mmcv.ops import DeformConv2d
+except (ImportError, OSError):
+    DeformConv2d = None
 
 # try:
 #     from basicsr.models.ops.dcn import (ModulatedDeformConvPack,
@@ -281,7 +284,9 @@ class DCNv2Pack(nn.Module):
                       deform_groups*deform_kernel_size*deform_kernel_size*2,
                       kernel_size=3, stride=1, padding=1)
         )
-        self.dconv = DeformConv2d(feature_channels, feature_channels, kernel_size=deform_kernel_size, 
+        if DeformConv2d is None:
+            raise RuntimeError("mmcv DeformConv2d not available. Set model.backbone.enable_align=False to skip.")
+        self.dconv = DeformConv2d(feature_channels, feature_channels, kernel_size=deform_kernel_size,
                                   stride=1, padding=deform_kernel_size//2, deform_groups=deform_groups, im2col_step=128)
 
 

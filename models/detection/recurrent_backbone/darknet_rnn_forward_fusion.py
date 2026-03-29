@@ -352,8 +352,9 @@ class RNNFusionDetectorStage(nn.Module):
             else:
                 img_unaligned = None
         else:
-            img_input_aligned == None
-            
+            img_input_aligned = img_input
+            img_unaligned = None
+
         if self.enable_blur_aug:
             img_input = self.blur_aug(img_input, ratio=2)
             raise NotImplementedError

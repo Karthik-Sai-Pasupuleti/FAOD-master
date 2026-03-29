@@ -215,24 +215,36 @@ class WandbLogger(Logger):
             self._checkpoint_callback = checkpoint_callback
             self._save_last = checkpoint_callback.save_last
         if self._log_model:
+            if isinstance(wandb.run, RunDisabled) or not isinstance(wandb.run, Run):
+                return
             self._scan_and_log_checkpoints(checkpoint_callback, self._save_last and not self._save_last_only_final)
 
     @rank_zero_only
     def finalize(self, status: str) -> None:
         # log checkpoints as artifacts
         if self._checkpoint_callback and self._log_model:
+            if isinstance(wandb.run, RunDisabled) or not isinstance(wandb.run, Run):
+                return
             self._scan_and_log_checkpoints(self._checkpoint_callback, self._save_last)
 
     def _get_public_run(self):
         if self._public_run is None:
             experiment = self.experiment
-            runpath = experiment._entity + '/' + experiment._project + '/' + experiment._run_id
-            api = wandb.Api()
-            self._public_run = api.run(path=runpath)
+            entity = getattr(experiment, 'entity', None) or getattr(experiment, '_entity', None)
+            project = getattr(experiment, 'project', None) or getattr(experiment, '_project', None)
+            run_id = getattr(experiment, 'id', None) or getattr(experiment, '_run_id', None)
+            runpath = f'{entity}/{project}/{run_id}'
+            try:
+                api = wandb.Api()
+                self._public_run = api.run(path=runpath)
+            except Exception:
+                return None
         return self._public_run
 
     def _num_logged_artifact(self):
         public_run = self._get_public_run()
+        if public_run is None:
+            return 0
         return len(public_run.logged_artifacts())
 
     def _scan_and_log_checkpoints(self, checkpoint_callback: "ReferenceType[ModelCheckpoint]", save_last: bool) -> None:
@@ -340,6 +352,8 @@ class WandbLogger(Logger):
                 print(f'Failed to delete artifact {artifact.name} due to wandb.errors.CommError')
 
         public_run = self._get_public_run()
+        if public_run is None:
+            return
 
         score2art = list()
         for artifact in public_run.logged_artifacts():
