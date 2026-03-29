@@ -14,29 +14,37 @@ We use [uv](https://github.com/astral-sh/uv) for fast, reproducible dependency m
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-### Create environment and install dependencies
+### Create environment and install all dependencies
 ```bash
-# Create a Python 3.11 venv
-uv venv --python 3.11 .venv
-source .venv/bin/activate
+git clone https://github.com/Karthik-Sai-Pasupuleti/FAOD-master
+cd FAOD-master
 
-# Install PyTorch (CUDA 11.8) + all dependencies in one shot
+# Create Python 3.11 venv
+uv venv --python 3.11 .venv
+
+# Install all packages (PyTorch CUDA 11.8 + everything else)
 uv pip install -r requirements.txt \
     --index-url https://download.pytorch.org/whl/cu118 \
     --extra-index-url https://pypi.org/simple
 ```
 
-Or use `pyproject.toml` (syncs everything automatically):
+### Activate the environment
 ```bash
-uv sync
 source .venv/bin/activate
 ```
 
-### Add/remove packages
+Or prefix every command with `uv run` to skip activation entirely:
 ```bash
-uv add <package>          # add and update pyproject.toml
-uv remove <package>       # remove
+uv run python train.py ...
+```
+
+### Manage packages
+```bash
+uv add <package>          # add to pyproject.toml and install
+uv remove <package>       # remove from pyproject.toml and uninstall
 uv pip install <package>  # ad-hoc install without touching pyproject.toml
+uv pip list               # show installed packages
+uv sync                   # sync venv to match pyproject.toml exactly
 ```
 
 ### mmcv (optional — only if model.backbone.enable_align=True)
@@ -76,7 +84,7 @@ datasets/dsec_data/
 ### Step 2 — Convert to FAOD flat format
 
 ```bash
-python prepare_dsec_small.py
+uv run python prepare_dsec_small.py
 ```
 
 This produces:
@@ -89,7 +97,7 @@ data/dsec_small_flat/
 ### Step 3 — Build stacked histogram representations
 
 ```bash
-python frame_construction/main_dsec.py \
+uv run python frame_construction/main_dsec.py \
     --input_dir data/dsec_small_flat \
     --target_dir data/dsec_small_h5 \
     --num_processes 2
@@ -113,7 +121,7 @@ data/dsec_small_h5/freq_1_1/
 ### Small-scale training (single sequence, no wandb, no deformable alignment)
 
 ```bash
-WANDB_MODE=disabled python train.py \
+WANDB_MODE=disabled uv run python train.py \
     dataset=dsec \
     dataset.path=data/dsec_small_h5/freq_1_1 \
     +experiment/dsec=tiny.yaml \
@@ -143,7 +151,7 @@ Key flags explained:
 ```bash
 wandb login   # set API key once
 
-python train.py \
+uv run python train.py \
     dataset=dsec \
     dataset.path=/path/to/dsec_full_h5/freq_1_1 \
     +experiment/dsec=base.yaml \
@@ -157,7 +165,7 @@ python train.py \
 ## 4. Validation / Inference
 
 ```bash
-python validation.py \
+uv run python validation.py \
     dataset=dsec \
     dataset.path=data/dsec_small_h5/freq_1_1 \
     checkpoint=dummy/<run_id>/checkpoints/<checkpoint>.ckpt \
@@ -173,7 +181,7 @@ python validation.py \
 ## 5. Visualization (demo.py)
 
 ```bash
-python demo.py \
+uv run python demo.py \
     dataset=dsec \
     dataset.path=data/dsec_small_h5/freq_1_1 \
     checkpoint=dummy/<run_id>/checkpoints/<checkpoint>.ckpt \
